@@ -1,15 +1,34 @@
-import { ArrowLeftIcon, PencilIcon, TrashIcon } from "@heroicons/react/solid";
+import {
+  ArrowLeftIcon,
+  PencilIcon,
+  TrashIcon,
+  PlusCircleIcon,
+} from "@heroicons/react/solid";
 import React, { useState } from "react";
-import { useComments, useDeletePost, useEditPost } from "../hooks/hooks";
+import {
+  useComments,
+  useDeletePost,
+  useEditPost,
+  useCreatCommnets,
+  useDeleteComments,
+  useEditComments,
+} from "../hooks/hooks";
 
 export default function DetailPost({ postId, setShow, postData }) {
   const { data, isLoading } = useComments({ id: postId });
   const [title, setTitle] = useState(postData?.title);
   const [body, setBody] = useState(postData?.body);
+  const [titleComment, setTitleComment] = useState("");
+  const [bodyCommment, setBodyComment] = useState("");
   const [showEdit, setShowEdit] = useState(true);
-
+  const [showEditComments, setShowEditComments] = useState(true);
   const { mutate } = useDeletePost({ id: postId });
+  const { mutate: DelComments } = useDeleteComments({ id: postId });
+  const { mutate: EditCmnts } = useEditComments({ id: postId });
+
   const { mutate: Edit } = useEditPost({ id: postId });
+  const { mutate: postComments } = useCreatCommnets({ id: postId });
+
   const DeletePost = () => {
     mutate({ id: postId });
     setShow(false);
@@ -22,6 +41,25 @@ export default function DetailPost({ postId, setShow, postData }) {
     title: title,
     body: body,
   };
+
+  const createComments = () => {
+    postComments(payloadComments);
+  };
+  const DeleteComments = () => {
+    DelComments({ id: postId });
+    setShow(false);
+  };
+  const EditCommnets = () => {
+    EditCmnts({ payload, id: postId });
+    setShowEditComments(false);
+  };
+
+  const payloadComments = {
+    title: title,
+    body: body,
+    postId: postId,
+  };
+
   if (isLoading) {
     return <></>;
   } else {
@@ -85,19 +123,63 @@ export default function DetailPost({ postId, setShow, postData }) {
             </div>
           )}
           <h1 className="text-red-300 font-bold text-lg">Comments</h1>
+          <input
+            type="text"
+            value={titleComment}
+            className="p-2"
+            placeholder="title"
+            onChange={(e) => {
+              setTitleComment(e.target.value);
+            }}
+          />
+          <textarea
+            value={bodyCommment}
+            className="p-2"
+            placeholder="body"
+            onChange={(e) => {
+              setBodyComment(e.target.value);
+            }}
+          />
+          <div className="flex">
+            <button
+              className="bg-green-400 text-white font-extrabold w-max rounded-lg p-4 flex items-center"
+              onClick={showEditComments ? EditCommnets : createComments}
+            >
+              <PlusCircleIcon className="h-8 mr-4" />
+              {showEditComments ? "Edit Comments" : " Add Comments"}
+            </button>
+            {showEditComments ? (
+              <button
+                onClick={() => {
+                  setShowEditComments(false);
+                  setBodyComment("");
+                  setTitleComment("");
+                }}
+                className="bg-red-400 ml-4 text-white font-extrabold w-max rounded-lg p-4 flex items-center"
+              >
+                Cancel
+              </button>
+            ) : (
+              <></>
+            )}
+          </div>
+
           {data.map((post) => (
             <div key={post.id} className="bg-gray-200 p-4 ml-6">
               <h1 className="font-semibold text-gray-800">{post.name}</h1>
               <p className="capitalize text-gray-700">{post.email}</p>
               <p className="">{post.body}</p>
+
               <div className="flex mt-4">
-                <button className="flex" onClick={DeletePost}>
+                <button className="flex" onClick={DeleteComments}>
                   <TrashIcon className="h-6 mr-4" /> Delete
                 </button>
                 <button
                   className="flex ml-4"
                   onClick={() => {
-                    setShowEdit(false);
+                    setTitleComment(post.name);
+                    setBodyComment(post.body);
+                    setShowEditComments(true);
                   }}
                 >
                   <PencilIcon className="h-6 mr-4" /> Edit

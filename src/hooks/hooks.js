@@ -98,6 +98,32 @@ function useDeletePost() {
   );
 }
 
+function useCreatCommnets() {
+  return useMutation((payload) =>
+    client(`/comments`, {
+      method: "POST",
+      data: payload,
+    })
+  );
+}
+
+function useEditComments() {
+  return useMutation(({ payload, id } = {}) =>
+    client(`/comments/${id}`, {
+      method: "PUT",
+      data: payload,
+    })
+  );
+}
+
+function useDeleteComments() {
+  return useMutation(({ id } = {}) =>
+    client(`/comments/${id}`, {
+      method: "DELETE",
+    })
+  );
+}
+
 export {
   usePost,
   fetchPost,
@@ -114,4 +140,7 @@ export {
   useCreatePost,
   useEditPost,
   useDeletePost,
+  useCreatCommnets,
+  useEditComments,
+  useDeleteComments,
 };
